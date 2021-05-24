@@ -86,6 +86,7 @@ const DISABLE_AUTO_FETCH_LOADING_BAR_TIMEOUT = 5000; // ms
 const FORCE_PAGES_LOADED_TIMEOUT = 10000; // ms
 const WHEEL_ZOOM_DISABLED_TIMEOUT = 1000; // ms
 const ENABLE_PERMISSIONS_CLASS = "enablePermissions";
+const BASE64_MARKER = ';base64,';
 
 const ViewOnLoad = {
   UNKNOWN: -1,
@@ -955,6 +956,10 @@ const PDFViewerApplication = {
         });
       }
     );
+  },
+
+  async loadDataURI(pdfAsDataURI) {
+    webViewerLoadDataURI(pdfAsDataURI);
   },
 
   /**
@@ -2167,7 +2172,10 @@ function webViewerInitialized() {
   if (typeof PDFJSDev === "undefined" || PDFJSDev.test("GENERIC")) {
     const queryString = document.location.search.substring(1);
     const params = parseQueryString(queryString);
-    file = "file" in params ? params.file : AppOptions.get("defaultUrl");
+    if ("file" in params) {
+      file = params.file;
+    }
+    // file = "file" in params ? params.file : AppOptions.get("defaultUrl");
     validateFileURL(file);
   } else if (PDFJSDev.test("MOZCENTRAL")) {
     file = window.location.href;
@@ -2261,6 +2269,9 @@ function webViewerInitialized() {
   );
 
   try {
+    if (file == undefined) {
+      return;
+    }
     webViewerOpenFileViaURL(file);
   } catch (reason) {
     PDFViewerApplication.l10n.get("loading_error").then(msg => {
@@ -2282,6 +2293,26 @@ function webViewerOpenFileViaURL(file) {
       throw new Error("Not implemented: webViewerOpenFileViaURL");
     }
   }
+}
+
+function webViewerConvertDataURIToBinary(dataURI) {
+  const base64Index = dataURI.indexOf(BASE64_MARKER) + BASE64_MARKER.length;
+  const base64 = dataURI.substring(base64Index);
+  const raw = atob(base64);
+  const rawLength = raw.length;
+  let array = new Uint8Array(new ArrayBuffer(rawLength));
+
+  for(var i = 0; i < rawLength; i++) {
+    array[i] = raw.charCodeAt(i);
+  }
+
+  return array;
+}
+
+function webViewerLoadDataURI(pdfAsDataURI) {
+  console.log(pdfAsDataURI);
+  const pdfData = webViewerConvertDataURIToBinary(pdfAsDataURI);
+  PDFViewerApplication.open(pdfData);
 }
 
 function webViewerResetPermissions() {

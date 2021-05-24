@@ -1,3 +1,7 @@
+# About this folk
+This is a private folk modified of any downloaded PDF file that can be displayed on Android WebView.
+I separately coded for Android with reference to [here](https://github.com/loosemoose/androidpdf).
+
 # PDF.js [![Build Status](https://github.com/mozilla/pdf.js/workflows/CI/badge.svg?branch=master)](https://github.com/mozilla/pdf.js/actions?query=workflow%3ACI+branch%3Amaster)
 
 [PDF.js](https://mozilla.github.io/pdf.js/) is a Portable Document Format (PDF) viewer that is built with HTML5.
